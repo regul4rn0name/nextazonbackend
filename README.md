@@ -1,4 +1,5 @@
 # Nextazon API
+# Vibe Coded AF (will refactor later)
 
 Configure `MONGO_URI` in `.env`. Optional: `MONGO_DB` (default `nextazon`) and
 `PORT` (default `3002`). `pnpm start` connects before listening, creates a TTL

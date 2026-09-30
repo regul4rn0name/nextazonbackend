@@ -9,6 +9,8 @@ const hash = token => createHash('sha256').update(token).digest('hex');
 
 function createApp(db, realtime = {onlineIds:()=>[]}) {
   const app = express();
+  // Production traffic reaches Express through the trusted Next.js proxy.
+  if(process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
   app.use(express.json({ limit: '16kb' }));
   app.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   async function rawSession(req) {

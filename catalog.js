@@ -18,8 +18,12 @@ function buildCatalog() {
       // Some non-collectible music tracks have no artwork in the source package.
       const variant = [item.variation, item.pattern].filter(Boolean).join(' · ') || (kind === 'recipes' ? 'DIY recipe' : 'Original');
       const localized = names(entry.translations);
-      const variants = names(item.variantTranslations);
-      const searchNames = [...new Set([entry.name, ...localized, ...localized.flatMap(name => variants.map(v => `${name} ${v}`))].map(normalize))];
+      // Pair names and variants only within the same locale, avoiding a quadratic
+      // cross-language expansion that makes substring search expensive.
+      const localizedVariants = Object.entries(entry.translations || {}).flatMap(([locale,name]) =>
+        /^[a-zA-Z]{4}$/.test(locale) && typeof name === 'string' && typeof item.variantTranslations?.[locale] === 'string'
+          ? [`${name} ${item.variantTranslations[locale]}`] : []);
+      const searchNames = [...new Set([entry.name, ...localized, ...localizedVariants].map(normalize))];
       const _id = `${kind}-${item.uniqueEntryId || item.filename || item.internalId}`;
       result.set(_id, {_id, name: entry.name, image: image || "/item-placeholder.svg", variant, category: kind === 'villagers' ? 'Villagers' : kind === 'recipes' ? 'DIY recipes' : kind === 'creatures' ? 'Creatures' : category(item.sourceSheet), kind, translations: entry.translations || {}, searchNames});
     }
